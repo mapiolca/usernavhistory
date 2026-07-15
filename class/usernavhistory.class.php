@@ -30,21 +30,23 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
  */
 class UserNavHistory extends CommonObject
 {
+
+	/**
+	 * @var string Prefix used for automatic triggers
+	 */
+	const TRIGGER_PREFIX = 'USERNAVHISTORY';
 	/**
 	 * @var string ID of module.
 	 */
 	public $module = 'usernavhistory';
-
 	/**
 	 * @var string ID to identify managed object.
 	 */
 	public $element = 'usernavhistory';
-
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
 	 */
 	public $table_element = 'user_navhistory';
-
 	/**
 	 * @var int  Does this object support multicompany module ?
 	 * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
@@ -114,9 +116,12 @@ class UserNavHistory extends CommonObject
 
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
-	 * @param DoliDb $db Database handler
+	 * Initializes the object, filters disabled fields based on global settings,
+	 * and translates field options.
+	 *
+	 * @param DoliDB $db Database handler.
 	 */
 	public function __construct(DoliDB $db)
 	{
@@ -127,12 +132,12 @@ class UserNavHistory extends CommonObject
 		if (empty(getDolGlobalString('MAIN_SHOW_TECHNICAL_ID')) && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
-		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
+		if (!isModEnabled('multicompany') && isset($this->fields['entity'])) {
 			$this->fields['entity']['enabled'] = 0;
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->rights->usernavhistory->usernavhistory->read) {
+		/*if ($user->hasRight('usernavhistory', 'usernavhistory', 'read')) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
@@ -165,7 +170,7 @@ class UserNavHistory extends CommonObject
 	 */
 	public function create(User $user, $notrigger = false)
 	{
-		return $this->createCommon($user, $notrigger);
+		return $this->createCommon($user, true);
 	}
 
 	/**
@@ -179,9 +184,9 @@ class UserNavHistory extends CommonObject
 	 */
 	public function fetch($id, $userid = 0, $elementid = 0, $elementtype = '')
 	{
-		if(!empty($id)) {
+		if (!empty($id)) {
 			$result = $this->fetchCommon($id);
-		} else if(!empty($userid) && !empty($elementid) && !empty($elementtype)) {
+		} elseif (!empty($userid) && !empty($elementid) && !empty($elementtype)) {
 			$moreWhere = " AND fk_user = ".$userid;
 			$moreWhere.= " AND element_id = ".$elementid;
 			$moreWhere.= " AND element_type = '".$elementtype."'";
@@ -193,35 +198,6 @@ class UserNavHistory extends CommonObject
 
 		return $result;
 	}
-
-
-
-	/**
-	 * Copié depuis add_object_linked du common object en V16 de Dolibarr
-	 * permet de générer le element_type
-	 *
-	 * @param CommonObject    $object
-	 * @return string formatted as elementType
-	 */
-	static public function getObjectElementType($object)
-	{
-		// Elements of the core modules which have `$module` property but may to which we don't want to prefix module part to the element name for finding the linked object in llx_element_element.
-		// It's because an entry for this element may be exist in llx_element_element before this modification (version <=14.2) and ave named only with their element name in fk_source or fk_target.
-		$coreModules = array('knowledgemanagement', 'partnership', 'workstation', 'ticket', 'recruitment', 'eventorganization');
-		// Add module part to target type if object has $module property and isn't in core modules.
-
-		if(!empty($object->module) && !in_array($object->module, $coreModules)){
-			$modulePrefix = $object->module . '_';
-			if(strpos($object->element, $modulePrefix) === false){
-				return $modulePrefix.$object->element;
-			}
-		}
-
-		return $object->element;
-	}
-
-
-
 	/**
 	 * Load list of objects in memory from the database.
 	 *
@@ -288,7 +264,7 @@ class UserNavHistory extends CommonObject
 				$record->setVarsFromFetchObj($obj);
 				$record->object = $this->getObjectByElement($record->element_type, $record->element_id);
 
-				if($record->object){
+				if ($record->object) {
 					$records[$record->id] = $record;
 				}
 
@@ -452,24 +428,22 @@ class UserNavHistory extends CommonObject
 	 * @param int $userid ID of concerned user
 	 * @param int $elementid ID of element concerned
 	 * @param string $elementtype Type of element concerned
-	 * @param int $nbToKeep Number max of element to keep in history for the user
 	 * @return int 0 on success, < 0 on error
 	 */
 	public function addElementInUserHistory(int $userid, int $elementid, string $elementtype)
 	{
 		global $user, $conf;
-
 		$error = 0;
 		$this->db->begin();
 
 		// We try to load the element in the user history to check if it's already existing
 		$res = $this->fetch(0, $userid, $elementid, $elementtype);
 
-		if($res < 0) {
+		if ($res < 0) {
 			$error++;
 		}
 
-		if(!$error) {
+		if (!$error) {
 			if ($res > 0) { // Element is already in history, we just update the last view date
 				$this->date_last_view = dol_now();
 				$res = $this->update($user);
@@ -478,23 +452,20 @@ class UserNavHistory extends CommonObject
 				$this->element_id = $elementid;
 				$this->element_type = $elementtype;
 				$this->date_last_view = dol_now();
-
 				$res = $this->create($user);
 			}
 		}
-
-		if($res < 0) {
+		if ($res < 0) {
 			$error++;
 		}
 
-		if(!$error) {
+		if (!$error) {
 			$res = $this->cleanUserHistory($user->id,  getDolGlobalString('USERNAVHISTORY_MAX_ELEMENT_NUMBER'));
-			if($res < 0) {
+			if ($res < 0) {
 				$error++;
 			}
 		}
-
-		if(!$error) {
+		if (!$error) {
 			$this->db->commit();
 			return 0;
 		} else {
@@ -507,7 +478,7 @@ class UserNavHistory extends CommonObject
 	 * Remove user navigation history to only keep $limit elements
 	 *
 	 * @param int $userid ID of the concerned user
-	 * @param int $limit Number of navigation history to keep
+	 * @param int $nbToKeep Number of navigation history to keep
 	 * @return int 1 on success, < 0 on error
 	 */
 	public function cleanUserHistory(int $userid, int $nbToKeep)
@@ -521,7 +492,7 @@ class UserNavHistory extends CommonObject
 		$sql.= ' AND rowid NOT IN ('.$sqlLastN.')';
 
 		$resql = $this->db->query($sql);
-		if(!$resql) {
+		if (!$resql) {
 			$this->errors[] = $this->db->lasterror();
 			return -1;
 		}
@@ -534,18 +505,18 @@ class UserNavHistory extends CommonObject
 	 * Create a new object instance based on the element type
 	 * Fetch the object if id is provided
 	 *
-	 * @param string $objecttype Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
+	 * @param string $elementtype Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
 	 * @param int $elementid Id of element to provide if fetch is needed
 	 * @return CommonObject object of $elementtype, fetched by $elementid
 	 */
-	function getObjectByElement($elementtype, $elementid = 0)
+	public function getObjectByElement($elementtype, $elementid = 0)
 	{
 		global $conf, $langs, $db, $action, $hookmanager;
 
-        /**
-         * TODO factoriser cette méthode lorsque cette PR sera passée : https://github.com/Dolibarr/dolibarr/pull/21674
-         * pour prendre en compte la rétrocompatibilité
-         */
+		/**
+		 * TODO factoriser cette méthode lorsque cette PR sera passée : https://github.com/Dolibarr/dolibarr/pull/21674
+		 * pour prendre en compte la rétrocompatibilité
+		 */
 
 		$ret = -1;
 		$regs = array();
@@ -560,8 +531,7 @@ class UserNavHistory extends CommonObject
 		}
 
 
-		if (preg_match('/^([^_]+)_([^_]+)/i', $elementtype, $regs))
-		{
+		if (preg_match('/^([^_]+)_([^_]+)/i', $elementtype, $regs)) {
 			$module = $regs[1];
 			$myobject = $regs[2];
 		}
@@ -569,23 +539,21 @@ class UserNavHistory extends CommonObject
 		// Generic case for $classpath
 		$classpath = $module.'/class';
 
-		list($classpath, $module, $classfile, $classname, $mainmodule) =  $this->setInternalValues($elementtype, $classpath, $module, $myobject );
+		list($classpath, $module, $classfile, $classname, $mainmodule) =  $this->setInternalValues($elementtype, $classpath, $module, $myobject);
 
 
 		$hookmanager->initHooks(array('usernavhistorydao'));
 		$parameters = array('elementtype' => &$elementtype, 'elementid'=> &$elementid, 'classfile' => &$classfile, 'classname' => &$classname, 'classpath' => &$classpath, 'module' => &$module);
 		$hookmanager->executeHooks('getObjectByElement', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
-		if (!empty($conf->$module->enabled))
-		{
+		if (isModEnabled($module)) {
 			$res = dol_include_once('/'.$classpath.'/'.$classfile.'.class.php');
-			if ($res)
-			{
+			if ($res) {
 				if (class_exists($classname)) {
 					$obj = new $classname($db);
 					$obj->mainmodule = $mainmodule;
-					if(!empty($elementid)) {
-						if($obj->fetch($elementid) < 1){
+					if (!empty($elementid)) {
+						if ($obj->fetch($elementid) < 1) {
 							return 0;
 						}
 					}
@@ -597,13 +565,18 @@ class UserNavHistory extends CommonObject
 	}
 
 	/**
-	 * @param string $elementtype
-	 * @param string $classpath
-	 * @param string $module
-	 * @param string $myobject
-	 * @return array
+	 * Resolves internal file paths, class names, and module definitions based on the element type.
+	 * * This method maps a generic element type (e.g., 'facture') to its specific
+	 * Dolibarr system properties (classpath, module name, class file, etc.).
+	 *
+	 * @param string $elementtype The type of the element (e.g., 'invoice', 'propal').
+	 * @param string $classpath   Default classpath (overridden by the mapping).
+	 * @param string $module      Default module name (overridden by the mapping).
+	 * @param string $myobject    Default object name (overridden by the mapping).
+	 * @return array Returns an array containing [$classpath, $module, $classfile, $classname, $mainmodule].
 	 */
-	public function setInternalValues( string $elementtype, string $classpath, string $module, string $myobject): array{
+	public function setInternalValues(string $elementtype, string $classpath, string $module, string $myobject): array
+	{
 		$mainmodule = "";
 
 		// Pour que les liens apparaissent dans l'interface il est impératif de renseigner
@@ -614,284 +587,248 @@ class UserNavHistory extends CommonObject
 		$mainmodule
 
 		 */
+		// Generic case for $classfile and $classname
+		$classfile = strtolower($myobject);
+		$classname = ucfirst($myobject);
 
 		// Special cases, to work with non standard path
-		if ($elementtype == 'facture' || $elementtype == 'invoice') {
+
+		if (function_exists('getElementProperties')) {
+			$element_properties =  getElementProperties($elementtype);
+			$classpath = $element_properties['classpath'];
+			$module= $element_properties['module'];
+			$classfile = $element_properties['classfile'];
+			$classname = $element_properties['classname'];
+		} elseif ($elementtype == 'facture' || $elementtype == 'invoice') {
 			$classpath = 'compta/facture/class';
 			$module='facture';
 			$myobject='facture';
 			$mainmodule="billing";
-
-		}elseif ($elementtype == 'product') {
+		} elseif ($elementtype == 'product') {
 			$classpath = 'product/class';
 			$module='product';
 			$myobject='product';
 			$mainmodule="products";
-		}
-		elseif ($elementtype == 'ticket' ) {
+		} elseif ($elementtype == 'ticket' ) {
 			$classpath = 'ticket/class';
 			$module='ticket';
 			$myobject='ticket';
 			$mainmodule="ticket";
-		}
-		elseif ($elementtype == 'holiday' ) {
+		} elseif ($elementtype == 'holiday' ) {
 			$classpath = 'holiday/class';
 			$module='holiday';
 			$myobject='holiday';
 			$mainmodule="hrm";
-		}
-		elseif ($elementtype == 'societe' ) {
+		} elseif ($elementtype == 'societe' ) {
 			$classpath = 'societe/class';
 			$module='societe';
 			$myobject='societe';
 			$mainmodule="companies";
-		}
-		elseif ($elementtype == 'commande' || $elementtype == 'order') {
+		} elseif ($elementtype == 'commande' || $elementtype == 'order') {
 			$classpath = 'commande/class';
 			$module='commande';
 			$myobject='commande';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'contact')  {
+		} elseif ($elementtype == 'contact') {
 			$module = 'societe';
 			$mainmodule="companies";
-		}
-		elseif ($elementtype == 'category')  {
+		} elseif ($elementtype == 'category') {
 			$classpath = 'categories/class';
 			$module ='categorie';
 			$myobject='categorie';
-		}
-		elseif ($elementtype == 'propal')  {
+		} elseif ($elementtype == 'propal') {
 			$classpath = 'comm/propal/class';
 			$module ='propal';
 			$myobject='propal';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'shipping') {
+		} elseif ($elementtype == 'shipping') {
 			$classpath = 'expedition/class';
 			$myobject = 'expedition';
 			$module = 'expedition';
 			$mainmodule="products";
-		}
-		elseif ($elementtype == 'delivery') {
+		} elseif ($elementtype == 'delivery') {
 			$classpath = 'delivery/class';
 			$myobject = 'delivery';
 			$module = 'expedition';
 			$mainmodule="products";
-		}
-		elseif ($elementtype == 'contract'|| $elementtype == 'contrat') {
+		} elseif ($elementtype == 'contract'|| $elementtype == 'contrat') {
 			$classpath = 'contrat/class';
 			$module='contrat';
 			$myobject='contrat';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'member') {
+		} elseif ($elementtype == 'member') {
 			$classpath = 'adherents/class';
 			$module='adherent';
 			$myobject='adherent';
 			$mainmodule="members";
-		}
-		elseif ($elementtype == 'cabinetmed_cons') {
+		} elseif ($elementtype == 'cabinetmed_cons') {
 			$classpath = 'cabinetmed/class';
 			$module='cabinetmed';
 			$myobject='cabinetmedcons';
-		}
-		elseif ($elementtype == 'fichinter') {
+		} elseif ($elementtype == 'fichinter') {
 			$classpath = 'fichinter/class';
 			$module='ficheinter';
 			$myobject='fichinter';
 			$mainmodule="ficheinter";
-		}
-		elseif ($elementtype == 'expensereport') {
+		} elseif ($elementtype == 'expensereport') {
 			$classpath = 'expensereport/class';
 			$module='expensereport';
 			$myobject='expensereport';
 			$mainmodule="hrm";
-		}
-		elseif ($elementtype == 'task') {
+		} elseif ($elementtype == 'task') {
 			$classpath = 'projet/class';
 			$module='projet';
 			$myobject='task';
 			$mainmodule="project";
-		}
-		elseif ($elementtype == 'stock') {
+		} elseif ($elementtype == 'stock') {
 			$classpath = 'product/stock/class';
 			$module='stock';
 			$myobject='stock';
 			$mainmodule="product";
-		}
-		elseif ($elementtype == 'inventory') {
+		} elseif ($elementtype == 'inventory') {
 			$classpath = 'product/inventory/class';
 			$module='stock';
 			$myobject='inventory';
 			$mainmodule="product";
-		}
-		elseif ($elementtype == 'mo') {
+		} elseif ($elementtype == 'mo') {
 			$classpath = 'mrp/class';
 			$module='mrp';
 			$myobject='mo';
 			$mainmodule="mrp";
-		}
-		elseif ($elementtype == 'salary') {
+		} elseif ($elementtype == 'salary') {
 			$classpath = 'salaries/class';
 			$module='salaries';
 			$myobject='salary';
 			$mainmodule="billing";
-		}
-		elseif ($elementtype == 'chargesociales') {
+		} elseif ($elementtype == 'chargesociales') {
 			$classpath = 'compta/sociales/class';
 			$module='tax';
 			$myobject='salary';
 			$mainmodule="tax";
-		}
-		elseif ($elementtype == 'tva') {
+		} elseif ($elementtype == 'tva') {
 			$classpath = 'compta/tva/class';
 			$module='tax';
 			$mainmodule="tax";
-		}
-		elseif ($elementtype == 'widthdraw') {
+		} elseif ($elementtype == 'widthdraw') {
 			$classpath = 'compta/prelevement/class';
 			$module='prelevement';
 			$myobject='bonprelevement';
 			$mainmodule="accountancy";
-		}
-		elseif ($elementtype == 'project' || $elementtype == 'projet') {
+		} elseif ($elementtype == 'project' || $elementtype == 'projet') {
 			$classpath = 'projet/class';
 			$module='projet';
 			$myobject = 'project';
 			$mainmodule="project";
-		}
-		elseif ($elementtype == 'project_task') {
+		} elseif ($elementtype == 'project_task') {
 			$classpath = 'projet/class';
 			$module='projet';
 			$mainmodule="project";
-		}
-		elseif ($elementtype == 'action') {
+		} elseif ($elementtype == 'action') {
 			$classpath = 'comm/action/class';
 			$module='agenda';
 			$myobject = 'ActionComm';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'mailing') {
+		} elseif ($elementtype == 'mailing') {
 			$classpath = 'comm/mailing/class';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'knowledgerecord') {
+		} elseif ($elementtype == 'knowledgerecord') {
 			$classpath = 'knowledgemanagement/class';
 			$module='knowledgemanagement';
 			$mainmodule="ticket";
-		}
-		elseif ($elementtype == 'recruitmentjobposition') {
+		} elseif ($elementtype == 'recruitmentjobposition') {
 			$classpath = 'recruitment/class';
 			$module='recruitment';
 			$mainmodule="hrm";
-		}
-		elseif ($elementtype == 'recruitmentcandidature') {
+		} elseif ($elementtype == 'recruitmentcandidature') {
 			$classpath = 'recruitment/class';
 			$module='recruitment';
 			$mainmodule="hrm";
-		}
-		elseif(function_exists('getElementProperties')){
-			$element_properties =  getElementProperties($elementtype);
-			$classpath = $element_properties['classpath'];
-			$module= $element_properties['module'];
-		}
-
-		// Generic case for $classfile and $classname
-		$classfile = strtolower($myobject);
-		$classname = ucfirst($myobject);
-		//print "objecttype=".$objecttype." module=".$module." subelement=".$subelement." classfile=".$classfile." classname=".$classname;
-		if ($elementtype == 'invoice_supplier') {
+		} elseif ($elementtype == 'invoice_supplier') {
 			$classfile = 'fournisseur.facture';
 			$classname = 'FactureFournisseur';
 			$classpath = 'fourn/class';
 			$module = 'fournisseur';
 			$mainmodule="billing";
-		}
-		elseif ($elementtype == 'order_supplier') {
+		} elseif ($elementtype == 'order_supplier') {
 			$classfile = 'fournisseur.commande';
 			$classname = 'CommandeFournisseur';
 			$classpath = 'fourn/class';
 			$module = 'fournisseur';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'supplier_proposal')  {
+		} elseif ($elementtype == 'supplier_proposal') {
 			$classfile = 'supplier_proposal';
 			$classname = 'SupplierProposal';
 			$classpath = 'supplier_proposal/class';
 			$module = 'supplier_proposal';
 			$mainmodule="commercial";
-		}
-		elseif ($elementtype == 'stock') {
+		} elseif ($elementtype == 'stock') {
 			$classpath = 'product/stock/class';
 			$classfile = 'entrepot';
 			$classname = 'Entrepot';
 			$mainmodule="products";
-		}
-		elseif ($elementtype == 'dolresource') {
+		} elseif ($elementtype == 'dolresource') {
 			$classpath = 'resource/class';
 			$classfile = 'dolresource';
 			$classname = 'Dolresource';
 			$module = 'resource';
 			$mainmodule="agenda";
-		}
-		elseif ($elementtype == 'payment_various') {
+		} elseif ($elementtype == 'payment_various') {
 			$classpath = 'compta/bank/class';
 			$module='tax';
 			$classfile = 'paymentvarious';
 			$classname = 'PaymentVarious';
 			$mainmodule="billing";
-		}
-		elseif ($elementtype == 'bank_account') {
+		} elseif ($elementtype == 'bank_account') {
 			$classpath = 'compta/bank/class';
 			$module='banque';
 			$classfile = 'account';
 			$classname = 'Account';
 			$mainmodule="bank";
-		}
-		elseif ($elementtype == 'adherent_type')  {
+		} elseif ($elementtype == 'adherent_type') {
 			$classpath = 'adherents/class';
 			$module = 'member';
 			$classfile='adherent_type';
 			$classname='AdherentType';
 			$mainmodule="members";
-		}
-		else if($elementtype == 'facturerec') {
+		} elseif ($elementtype == 'facturerec') {
 			$classfile = 'facture-rec';
 			$classpath = 'compta/facture/class';
 			$module = 'facture';
 			$classname = 'FactureRec';
 			$mainmodule="billing";
-		}
-		else if($elementtype == 'productlot') {
+		} elseif ($elementtype == 'productlot') {
 			$classfile = 'productlot';
 			$classpath = 'product/stock/class/';
 			$module = 'product';
 			$classname = 'ProductLot';
 			$mainmodule="products";
-
 		}
 
 		return array($classpath,$module,$classfile, $classname, $mainmodule);
 	}
 
 	/**
-	 *  on récupère depuis la table llx_menu le mainmenu  si on trouve une concordance avec la fin de l'url
-	 * @param string $url
-	 * @return string
+	 * Retrieves the main menu ID associated with a given URL.
+	 *
+	 * Extracts the relative path from the URL and queries the menu table
+	 * to find the corresponding 'fk_mainmenu'.
+	 *
+	 * @param string $url The full URL to process.
+	 * @return string The main menu ID, or an empty string if not found.
 	 */
-	public static function getMainMenuFromElement(string $url) : string {
+	public static function getMainMenuFromElement(string $url)
+	{
 		global $db;
 
 		// Vérifier si "custom" est présent dans l'URL
 		if (strpos($url, 'custom') !== false) {
 			// Extraire la partie de l'URL après "custom" et avant le premier "?"
 			$urlPartie = substr($url, strpos($url, 'custom') + strlen('custom'), strpos($url, '?') - strpos($url, 'custom'));
-		// sinon htdocs
-		}elseif (strpos($url, 'htdocs') !== false) {
+			// sinon htdocs
+		} elseif (strpos($url, 'htdocs') !== false) {
 			$urlPartie = substr($url, strpos($url, 'htdocs') + strlen('htdocs'), strpos($url, '?') - strpos($url, 'htdocs'));
-		// sinon le nom de domaine
-		}else{
+			// sinon le nom de domaine
+		} else {
 			$urlPartie = substr($url, strpos($url, DOL_URL_ROOT) + strlen(DOL_URL_ROOT), strpos($url, '?') - strpos($url, DOL_URL_ROOT));
 		}
 

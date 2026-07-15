@@ -25,8 +25,7 @@ namespace userNavHistory;
  */
 
 
-if (file_exists(DOL_DOCUMENT_ROOT . '/core/class/commonhookactions.class.php')){
-
+if (file_exists(DOL_DOCUMENT_ROOT . '/core/class/commonhookactions.class.php')) {
 	require_once DOL_DOCUMENT_ROOT . '/core/class/commonhookactions.class.php';
 	/**
 	 *	Parent class of all other hook actions classes
@@ -35,7 +34,7 @@ if (file_exists(DOL_DOCUMENT_ROOT . '/core/class/commonhookactions.class.php')){
 	{
 
 	}
-}else{
+} else {
 	/**
 	 *	Parent class of all other hook actions classes
 	 */
@@ -53,6 +52,3 @@ if (file_exists(DOL_DOCUMENT_ROOT . '/core/class/commonhookactions.class.php')){
 	}
 
 }
-
-
-

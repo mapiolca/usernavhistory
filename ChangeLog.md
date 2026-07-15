@@ -2,12 +2,24 @@
 
 ## [Unreleased]
 
+## 1.4
+- FIX : css margin-right in 20+ Dolibarr versions - 16/12/2025 - 1.4.1
+- FIX : css margin changes in 20+ Dolibarr versions + background color - 09/12/2025 - 1.4.0
 
+## 1.3
+- FIX : COMPAT V23 - *02/12/2025* - 1.3.5
+- FIX : DA026830 : (regression) link not displayed for some objects (like users) because of failure to load the class - *28/08/2025* - 1.3.4
+- FIX : DA026531 view last visited link - *11/08/2025* - 1.3.3  
+- FIX : COMPAT V22 - *02/07/2025* - 1.3.2
+- FIX : FATAL PHP compatibility 7.0  - *24/07/2024* - 1.3.1
+- FIX : Compat v20 
+  Changed Dolibarr compatibility range to 16 min - 20 max
+  Changed PHP compatibility range to 7.0 min - *24/07/2024* - 1.3.0
 
 ## 1.2
 
 - FIX : Les produits étaient manquants dans la barre de navigation - *18/07/2024* - 1.2.1
-- NEW : ajout des mainmenu dans les liens générés par le module - *17/05/2024* - 1.2.0  
+- NEW : ajout des mainmenu dans les liens générés par le module - *17/05/2024* - 1.2.0
 
 ## 1.1
 
