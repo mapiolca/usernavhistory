@@ -10,6 +10,7 @@ UserNavHistory displays the last business objects viewed by the current user in 
 - labels limited to 15 characters followed by `...` when truncated;
 - separate history for each user and Dolibarr entity;
 - automatic restoration of hidden entries when the window becomes wider.
+- automatic recalculation when a mobile device switches between portrait and landscape orientations.
 
 ## Compatibility
 

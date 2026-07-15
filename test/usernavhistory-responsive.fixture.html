@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>UserNavHistory responsive fixture</title>
+	<link rel="stylesheet" href="../css/usernavhistory.css">
+	<style>
+		body { margin: 0; font: 16px Arial, sans-serif; }
+		.usernavhistory { margin-top: 0; }
+	</style>
+	<script>
+		if (new URLSearchParams(window.location.search).get('fallback') === '1') {
+			window.ResizeObserver = undefined;
+			window.visualViewport = undefined;
+		}
+	</script>
+</head>
+<body>
+	<div class="usernavhistory">
+		<ol class="breadcrumb usernavhistory-list">
+			<li class="usernavhistory-marker"><span title="Historique">◷</span></li>
+			<li class="usernavhistory-item"><a href="#one" title="Exactement quinze">123456789012345</a></li>
+			<li class="usernavhistory-item"><a href="#two" title="Seize caractères">1234567890123456</a></li>
+			<li class="usernavhistory-item"><a href="#three" title="Unicode complet"><span aria-hidden="true">◆</span> Élément Unicode 🚀 très long</a></li>
+			<li class="usernavhistory-item"><a href="#four" title="Projet alpha">Projet alpha</a></li>
+			<li class="usernavhistory-item"><a href="#five" title="Commande client longue">Commande client extrêmement longue</a></li>
+			<li class="usernavhistory-item"><a href="#six" title="Facture fournisseur longue">Facture fournisseur très longue</a></li>
+			<li class="usernavhistory-item"><a href="#seven" title="Dernier élément"><span aria-hidden="true">★</span> Dernier élément extrêmement long</a></li>
+		</ol>
+	</div>
+	<script src="../js/usernavhistory.js"></script>
+</body>
+</html>
