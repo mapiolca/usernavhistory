@@ -21,22 +21,60 @@
 ModuleUserNavHistoryName = User browsing history
 # Module description 'ModuleUserNavHistoryDesc'
 ModuleUserNavHistoryDesc = Displays last viewed elements for a user
+UserNavHistoryDescription=Displays the last objects viewed by the user in a responsive navigation bar
 
 #
 # Admin page
 #
 UserNavHistorySetup = User browsing history setup
 Settings = Settings
-UserNavHistorySetupPage = Réglage du module Historique de navigation utilisateur
+UserNavHistorySetupPage = User browsing history module settings
 
 
 LastNElementViewed = Last %s element viewed
 
 USERNAVHISTORY_MAX_ELEMENT_NUMBER = Displayed items in breadcrumb
 
-#
+# Compatibility page
+Compatibility=Compatibility
+UserNavHistoryCompatibility=User browsing history compatibility
+CompatibilityEnvironment=Detected environment
+DetectedDolibarrVersion=Detected Dolibarr version
+DetectedPhpVersion=Detected PHP version
+MinimumDolibarrVersion=Minimum supported Dolibarr version
+MinimumPhpVersion=Minimum supported PHP version
+RecommendedEnvironment=Recommended environment
+RecommendedEnvironmentValue=Dolibarr 20 or later with PHP 8.0 or later
+CompatibilityFeature=Feature
+CoreAvailableFrom=Available in Dolibarr core from
+ModuleAvailableFrom=Available in the module from
+CompatibilityStatus=Status
+Available=Available
+Unavailable=Unavailable
+CompatibilityReasonBaseVersion=Requires Dolibarr 16 or later and PHP 7.0 or later
+CompatibilityFeatureNavigationHooks=Navigation hooks
+CompatibilityFeatureNavigationHooksDescription=Uses the native main/printMainArea and globalcard/doActions integration points
+CompatibilityFeatureNavigationHistory=Navigation history
+CompatibilityFeatureNavigationHistoryDescription=Records and displays the last viewed business objects
+CompatibilityFeatureHookParent=Hook parent class
+CompatibilityFeatureHookParentDescription=Uses the native class from Dolibarr 20 and the bundled backport on earlier versions
+CompatibilityFeatureGlobalHelpers=Dolibarr global helpers
+CompatibilityFeatureGlobalHelpersDescription=Directly uses the native constant and module activation helpers available on the historical baseline
+CompatibilityFeatureElementType=Object type detection
+CompatibilityFeatureElementTypeDescription=Uses the native method from Dolibarr 20 and the bundled historical fallback on earlier versions
+CompatibilityFeatureResponsiveHistory=Responsive history bar
+CompatibilityFeatureResponsiveHistoryDescription=Keeps the bar on one line by progressively hiding the oldest items
+
 # About page
-#
-About = About
-UserNavHistoryAbout = About User browsing history
-UserNavHistoryAboutPage = About User browsing history
+About=About
+UserNavHistoryAbout=About User browsing history
+UserNavHistoryAboutPage=Module maintenance and compatibility information
+AboutGeneralInformation=General information
+NoRequiredDependency=No required dependency
+MainFeatures=Main features
+AboutFeatureHistory=Keeps recently viewed objects per user and per entity
+AboutFeatureResponsive=Responsive navigation bar limited to one line
+AboutFeatureMulticompany=History isolation between entities
+UsefulLinks=Useful links
+DocumentationAndSourceCode=Documentation and source code
+UserNavHistoryCompatibilityValue=Dolibarr 16+ and PHP 7.0+; Dolibarr 20+ and PHP 8.0+ recommended

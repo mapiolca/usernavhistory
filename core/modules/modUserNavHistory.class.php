@@ -3,6 +3,7 @@
  * Copyright (C) 2018-2019  Nicolas ZABOURI         <info@inovea-conseil.com>
  * Copyright (C) 2019-2020  Frédéric France         <frederic.france@netlogic.fr>
  * Copyright (C) 2022 SuperAdmin <maxime@gmail.com>
+ * Copyright (C) 2026 ATM Consulting x Les Métiers du Bâtiment <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@ class modUserNavHistory extends DolibarrModules
 
 		// Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
 		// It is used to group modules by family in module setup page
-		$this->family = 'ATM Consulting';
+		$this->family = 'ATM Consulting x Les Métiers du Bâtiment';
 
 		// Module position in the family on 2 digits ('01', '10', '20', ...)
 		$this->module_position = '90';
@@ -68,11 +69,11 @@ class modUserNavHistory extends DolibarrModules
 		$this->descriptionlong = "UserNavHistoryDescription";
 
 		// Author
-		$this->editor_name = 'ATM Consulting';
+		$this->editor_name = 'ATM Consulting x Les Métiers du Bâtiment';
 		$this->editor_url = 'https://www.atm-consulting.fr';
 
 		// Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.4.1';
+		$this->version = '1.5.0';
 		// Url to the file with your last numberversion of this module
 		require_once __DIR__ . '/../../class/techatm.class.php';
 		$this->url_last_version = \userNavHistory\TechATM::getLastModuleVersionUrl($this);
@@ -108,11 +109,11 @@ class modUserNavHistory extends DolibarrModules
 			'theme' => 0,
 			// Set this to relative path of css file if module has its own css file
 			'css' => array(
-				'/usernavhistory/css/usernavhistory.css.php',
+				'/usernavhistory/css/usernavhistory.css',
 			),
 			// Set this to relative path of js file if module must load a js on all pages
 			'js' => array(
-				//   '/usernavhistory/js/usernavhistory.js.php',
+				'/usernavhistory/js/usernavhistory.js',
 			),
 			// Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
 			'hooks' => array(
@@ -141,8 +142,8 @@ class modUserNavHistory extends DolibarrModules
 		$this->langfiles = array("usernavhistory@usernavhistory");
 
 		// Prerequisites
-		$this->phpmin = array(7,0); // Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(16, 0); // Minimum version of Dolibarr required by module
+		$this->phpmin = array(7, 0); // Historical minimum kept while the code remains PHP 7 compatible
+		$this->need_dolibarr_version = array(16, 0); // Historical minimum supported through the bundled compatibility layer
 
 		// Messages at activation
 		$this->warnings_activation = array(); // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
@@ -156,7 +157,7 @@ class modUserNavHistory extends DolibarrModules
 		//                             2 => array('USERNAVHISTORY_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
 		// );
 		$this->const = array(
-			1 => array('USERNAVHISTORY_MAX_ELEMENT_NUMBER', 'chaine', 10, '', 0, 'current')
+			1 => array('USERNAVHISTORY_MAX_ELEMENT_NUMBER', 'chaine', 10, '', 0, 'current', 0)
 		);
 
 		// Some keys to add into the overwriting translation tables

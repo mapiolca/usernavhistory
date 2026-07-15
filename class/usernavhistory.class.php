@@ -111,6 +111,10 @@ class UserNavHistory extends CommonObject
 	public $element_id;
 	public $element_type;
 	public $date_last_view;
+	/**
+	 * @var string Main Dolibarr menu associated with the resolved history object.
+	 */
+	public $mainmodule = '';
 	// END MODULEBUILDER PROPERTIES
 
 
@@ -184,12 +188,15 @@ class UserNavHistory extends CommonObject
 	 */
 	public function fetch($id, $userid = 0, $elementid = 0, $elementtype = '')
 	{
+		global $conf;
+
 		if (!empty($id)) {
-			$result = $this->fetchCommon($id);
+			$result = $this->fetchCommon((int) $id);
 		} elseif (!empty($userid) && !empty($elementid) && !empty($elementtype)) {
-			$moreWhere = " AND fk_user = ".$userid;
-			$moreWhere.= " AND element_id = ".$elementid;
-			$moreWhere.= " AND element_type = '".$elementtype."'";
+			$moreWhere = ' AND entity = '.((int) $conf->entity);
+			$moreWhere.= ' AND fk_user = '.((int) $userid);
+			$moreWhere.= ' AND element_id = '.((int) $elementid);
+			$moreWhere.= " AND element_type = '".$this->db->escape((string) $elementtype)."'";
 
 			$result = $this->fetchCommon(0, null, $moreWhere);
 		} else {
@@ -198,6 +205,30 @@ class UserNavHistory extends CommonObject
 
 		return $result;
 	}
+
+	/**
+	 * Return the element type on Dolibarr versions predating CommonObject::getElementType().
+	 *
+	 * @param object $object Dolibarr business object.
+	 * @return string Element type.
+	 */
+	public static function getObjectElementType($object)
+	{
+		if (!is_object($object) || empty($object->element)) {
+			return '';
+		}
+
+		$coreModules = array('knowledgemanagement', 'partnership', 'workstation', 'ticket', 'recruitment', 'eventorganization');
+		if (!empty($object->module) && !in_array($object->module, $coreModules, true)) {
+			$modulePrefix = (string) $object->module.'_';
+			if (strpos((string) $object->element, $modulePrefix) === false) {
+				return $modulePrefix.(string) $object->element;
+			}
+		}
+
+		return (string) $object->element;
+	}
+
 	/**
 	 * Load list of objects in memory from the database.
 	 *
@@ -221,24 +252,30 @@ class UserNavHistory extends CommonObject
 		$sql .= $this->getFieldList('t');
 		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
 		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
-			$sql .= " WHERE t.entity IN (".getEntity($this->table_element).")";
+			$sql .= ' WHERE t.entity = '.((int) $conf->entity);
 		} else {
 			$sql .= " WHERE 1 = 1";
 		}
-		// Manage filter
+		// Manage filters. Only declared object fields are accepted as SQL criteria.
 		$sqlwhere = array();
+		$filtermode = strtoupper($filtermode) === 'OR' ? 'OR' : 'AND';
 		if (count($filter) > 0) {
 			foreach ($filter as $key => $value) {
-				if ($key == 't.rowid') {
-					$sqlwhere[] = $key." = ".((int) $value);
-				} elseif (in_array($this->fields[$key]['type'], array('date', 'datetime', 'timestamp'))) {
-					$sqlwhere[] = $key." = '".$this->db->idate($value)."'";
-				} elseif ($key == 'customsql') {
-					$sqlwhere[] = $value;
-				} elseif (strpos($value, '%') === false) {
-					$sqlwhere[] = $key." IN (".$this->db->sanitize($this->db->escape($value)).")";
+				$fieldName = strpos($key, 't.') === 0 ? substr($key, 2) : $key;
+				if (!isset($this->fields[$fieldName])) {
+					continue;
+				}
+
+				$sqlField = 't.'.$fieldName;
+				$fieldType = isset($this->fields[$fieldName]['type']) ? (string) $this->fields[$fieldName]['type'] : '';
+				if ($fieldName === 'rowid' || strpos($fieldType, 'integer') === 0) {
+					$sqlwhere[] = $sqlField.' = '.((int) $value);
+				} elseif (in_array($fieldType, array('date', 'datetime', 'timestamp'), true)) {
+					$sqlwhere[] = $sqlField." = '".$this->db->idate($value)."'";
+				} elseif (strpos((string) $value, '%') === false) {
+					$sqlwhere[] = $sqlField." = '".$this->db->escape((string) $value)."'";
 				} else {
-					$sqlwhere[] = $key." LIKE '%".$this->db->escape($value)."%'";
+					$sqlwhere[] = $sqlField." LIKE '".$this->db->escape((string) $value)."'";
 				}
 			}
 		}
@@ -263,8 +300,9 @@ class UserNavHistory extends CommonObject
 				$record = new self($this->db);
 				$record->setVarsFromFetchObj($obj);
 				$record->object = $this->getObjectByElement($record->element_type, $record->element_id);
+				$record->mainmodule = $this->mainmodule;
 
-				if ($record->object) {
+				if (is_object($record->object)) {
 					$records[$record->id] = $record;
 				}
 
@@ -448,6 +486,7 @@ class UserNavHistory extends CommonObject
 				$this->date_last_view = dol_now();
 				$res = $this->update($user);
 			} else { // Element is not in user navigation history so we add it
+				$this->entity = (int) $conf->entity;
 				$this->fk_user = $userid;
 				$this->element_id = $elementid;
 				$this->element_type = $elementtype;
@@ -460,7 +499,7 @@ class UserNavHistory extends CommonObject
 		}
 
 		if (!$error) {
-			$res = $this->cleanUserHistory($user->id,  getDolGlobalString('USERNAVHISTORY_MAX_ELEMENT_NUMBER'));
+			$res = $this->cleanUserHistory($userid, max(0, getDolGlobalInt('USERNAVHISTORY_MAX_ELEMENT_NUMBER', 10)));
 			if ($res < 0) {
 				$error++;
 			}
@@ -483,12 +522,20 @@ class UserNavHistory extends CommonObject
 	 */
 	public function cleanUserHistory(int $userid, int $nbToKeep)
 	{
+		global $conf;
+
+		$entity = (int) $conf->entity;
+		$userid = (int) $userid;
+		$nbToKeep = max(0, (int) $nbToKeep);
+
 		$sqlLastN = 'SELECT rowid FROM (SELECT rowid FROM '.MAIN_DB_PREFIX.$this->table_element;
-		$sqlLastN.= ' WHERE fk_user = '.$userid;
+		$sqlLastN.= ' WHERE entity = '.$entity;
+		$sqlLastN.= ' AND fk_user = '.$userid;
 		$sqlLastN.= ' ORDER BY date_last_view DESC LIMIT '.$nbToKeep.') foo';
 
 		$sql = 'DELETE FROM '.MAIN_DB_PREFIX.$this->table_element;
-		$sql.= ' WHERE fk_user = '.$userid;
+		$sql.= ' WHERE entity = '.$entity;
+		$sql.= ' AND fk_user = '.$userid;
 		$sql.= ' AND rowid NOT IN ('.$sqlLastN.')';
 
 		$resql = $this->db->query($sql);
@@ -507,7 +554,7 @@ class UserNavHistory extends CommonObject
 	 *
 	 * @param string $elementtype Type of object ('invoice', 'order', 'expedition_bon', 'myobject@mymodule', ...)
 	 * @param int $elementid Id of element to provide if fetch is needed
-	 * @return CommonObject object of $elementtype, fetched by $elementid
+	 * @return CommonObject|null Object of $elementtype, fetched by $elementid, or null when unavailable.
 	 */
 	public function getObjectByElement($elementtype, $elementid = 0)
 	{
@@ -518,8 +565,8 @@ class UserNavHistory extends CommonObject
 		 * pour prendre en compte la rétrocompatibilité
 		 */
 
-		$ret = -1;
 		$regs = array();
+		$this->mainmodule = '';
 
 		// Parse $objecttype (ex: project_task)
 		$module = $myobject =  $classfile = "";
@@ -540,6 +587,7 @@ class UserNavHistory extends CommonObject
 		$classpath = $module.'/class';
 
 		list($classpath, $module, $classfile, $classname, $mainmodule) =  $this->setInternalValues($elementtype, $classpath, $module, $myobject);
+		$this->mainmodule = (string) $mainmodule;
 
 
 		$hookmanager->initHooks(array('usernavhistorydao'));
@@ -551,17 +599,16 @@ class UserNavHistory extends CommonObject
 			if ($res) {
 				if (class_exists($classname)) {
 					$obj = new $classname($db);
-					$obj->mainmodule = $mainmodule;
 					if (!empty($elementid)) {
 						if ($obj->fetch($elementid) < 1) {
-							return 0;
+							return null;
 						}
 					}
 					return $obj;
 				}
 			}
 		}
-		return $ret;
+		return null;
 	}
 
 	/**
@@ -820,33 +867,36 @@ class UserNavHistory extends CommonObject
 	{
 		global $db;
 
-		// Vérifier si "custom" est présent dans l'URL
-		if (strpos($url, 'custom') !== false) {
-			// Extraire la partie de l'URL après "custom" et avant le premier "?"
-			$urlPartie = substr($url, strpos($url, 'custom') + strlen('custom'), strpos($url, '?') - strpos($url, 'custom'));
-			// sinon htdocs
-		} elseif (strpos($url, 'htdocs') !== false) {
-			$urlPartie = substr($url, strpos($url, 'htdocs') + strlen('htdocs'), strpos($url, '?') - strpos($url, 'htdocs'));
-			// sinon le nom de domaine
-		} else {
-			$urlPartie = substr($url, strpos($url, DOL_URL_ROOT) + strlen(DOL_URL_ROOT), strpos($url, '?') - strpos($url, DOL_URL_ROOT));
+		$decodedUrl = html_entity_decode($url, ENT_QUOTES, 'UTF-8');
+		$urlPath = parse_url($decodedUrl, PHP_URL_PATH);
+		if (!is_string($urlPath) || $urlPath === '') {
+			return '';
 		}
 
-		// Vérifier s'il y a un paramètre dans l'URL restante et le supprimer
-		$posParametre = strpos($urlPartie, '?');
-		if ($posParametre !== false) {
-			// Si un paramètre est présent, enlever tout ce qui vient après
-			$urlPartie = substr($urlPartie, 0, $posParametre);
+		$urlPartie = rawurldecode($urlPath);
+		foreach (array('/custom/', '/htdocs/') as $pathMarker) {
+			$markerPosition = strpos($urlPartie, $pathMarker);
+			if ($markerPosition !== false) {
+				$urlPartie = '/'.ltrim(substr($urlPartie, $markerPosition + strlen($pathMarker)), '/');
+				break;
+			}
+		}
+
+		if (DOL_URL_ROOT !== '' && strpos($urlPartie, DOL_URL_ROOT.'/') === 0) {
+			$urlPartie = substr($urlPartie, strlen(DOL_URL_ROOT));
+		}
+		if ($urlPartie === '') {
+			return '';
 		}
 
 		//prendre la fin du lien et recherche dans la table llx_menu colonne url
-		$sql =  "SELECT fk_mainmenu FROM ".MAIN_DB_PREFIX."menu WHERE url LIKE '%" . $urlPartie . "%' LIMIT 1";
+		$sql = "SELECT fk_mainmenu FROM ".MAIN_DB_PREFIX."menu WHERE url LIKE '%".$db->escape($urlPartie)."%' LIMIT 1";
 
 		// si je trouve je prend fk_mainmenu
 		$resql = $db->query($sql);
 		if ($resql && $db->num_rows($resql) >  0) {
-				$obj = $db->fetch_object($resql);
-				return $obj->fk_mainmenu;
+			$obj = $db->fetch_object($resql);
+			return is_object($obj) && isset($obj->fk_mainmenu) ? (string) $obj->fk_mainmenu : '';
 		}
 
 		return '';

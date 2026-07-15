@@ -21,15 +21,60 @@
 ModuleUserNavHistoryName = Historique navigation utilisateur
 # Module description 'ModuleUserNavHistoryDesc'
 ModuleUserNavHistoryDesc = Affiche les derniers éléments consultés par l'utilisateur
+UserNavHistoryDescription=Affiche les derniers éléments consultés par l'utilisateur dans une barre de navigation adaptative
 
 #
 # Admin page
 #
 UserNavHistorySetup = Réglages du module Historique navigation utilisateur
-Settings = Settings
+Settings = Réglages
 UserNavHistorySetupPage = Réglages du module Historique navigation utilisateur
 
 
 LastNElementViewed=Derniers %s éléments consultés
 
 USERNAVHISTORY_MAX_ELEMENT_NUMBER = Nombre d'éléments maximum affichés sur le fil d'Ariane
+
+# Compatibility page
+Compatibility=Compatibilité
+UserNavHistoryCompatibility=Compatibilité de l'historique de navigation
+CompatibilityEnvironment=Environnement détecté
+DetectedDolibarrVersion=Version Dolibarr détectée
+DetectedPhpVersion=Version PHP détectée
+MinimumDolibarrVersion=Version Dolibarr minimale supportée
+MinimumPhpVersion=Version PHP minimale supportée
+RecommendedEnvironment=Environnement recommandé
+RecommendedEnvironmentValue=Dolibarr 20 ou version ultérieure avec PHP 8.0 ou version ultérieure
+CompatibilityFeature=Fonctionnalité
+CoreAvailableFrom=Disponibilité native à partir de Dolibarr
+ModuleAvailableFrom=Disponibilité dans le module à partir de Dolibarr
+CompatibilityStatus=Statut
+Available=Disponible
+Unavailable=Indisponible
+CompatibilityReasonBaseVersion=Nécessite Dolibarr 16 ou version ultérieure et PHP 7.0 ou version ultérieure
+CompatibilityFeatureNavigationHooks=Hooks de navigation
+CompatibilityFeatureNavigationHooksDescription=Utilise les intégrations natives main/printMainArea et globalcard/doActions
+CompatibilityFeatureNavigationHistory=Historique de navigation
+CompatibilityFeatureNavigationHistoryDescription=Enregistrement et affichage des derniers objets consultés
+CompatibilityFeatureHookParent=Classe parente des hooks
+CompatibilityFeatureHookParentDescription=Utilise la classe native à partir de Dolibarr 20 et le backport fourni avant cette version
+CompatibilityFeatureGlobalHelpers=Fonctions globales Dolibarr
+CompatibilityFeatureGlobalHelpersDescription=Utilise directement les fonctions natives de constantes et d'activation disponibles sur le socle historique
+CompatibilityFeatureElementType=Identification des objets
+CompatibilityFeatureElementTypeDescription=Utilise la méthode native à partir de Dolibarr 20 et le fallback historique fourni avant cette version
+CompatibilityFeatureResponsiveHistory=Barre adaptative
+CompatibilityFeatureResponsiveHistoryDescription=Affichage sur une seule ligne avec masquage progressif des éléments les plus anciens
+
+# About page
+About=À propos
+UserNavHistoryAbout=À propos de l'historique de navigation
+UserNavHistoryAboutPage=Informations de maintenance et de compatibilité du module
+AboutGeneralInformation=Informations générales
+NoRequiredDependency=Aucune dépendance obligatoire
+MainFeatures=Fonctionnalités principales
+AboutFeatureHistory=Conservation des derniers objets consultés par utilisateur et par entité
+AboutFeatureResponsive=Barre de navigation adaptative limitée à une ligne
+AboutFeatureMulticompany=Isolation de l'historique entre les entités
+UsefulLinks=Liens utiles
+DocumentationAndSourceCode=Documentation et code source
+UserNavHistoryCompatibilityValue=Dolibarr 16+ et PHP 7.0+ ; Dolibarr 20+ et PHP 8.0+ recommandés

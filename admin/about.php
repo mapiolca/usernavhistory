@@ -1,19 +1,10 @@
 <?php
-/* Copyright (C) 2004-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2022 SuperAdmin <maxime@gmail.com>
+/* Copyright (C) 2026 ATM Consulting x Les Métiers du Bâtiment <developpeur@lesmetiersdubatiment.fr>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 /**
@@ -22,90 +13,87 @@
  * \brief   About page of module UserNavHistory.
  */
 
-// Load Dolibarr environment
 $res = 0;
-// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (!$res && !empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
-	$res = @include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (!$res && !empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
+	$res = @include $_SERVER['CONTEXT_DOCUMENT_ROOT'].'/main.inc.php';
 }
-// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
-$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2 = realpath(__FILE__); $i = strlen($tmp) - 1; $j = strlen($tmp2) - 1;
+$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
+$tmp2 = realpath(__FILE__);
+$i = strlen($tmp) - 1;
+$j = strlen($tmp2) - 1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
-	$i--; $j--;
+	$i--;
+	$j--;
 }
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1))."/main.inc.php")) {
-	$res = @include substr($tmp, 0, ($i + 1))."/main.inc.php";
+if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1)).'/main.inc.php')) {
+	$res = @include substr($tmp, 0, ($i + 1)).'/main.inc.php';
 }
-if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php")) {
-	$res = @include dirname(substr($tmp, 0, ($i + 1)))."/main.inc.php";
+if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1))).'/main.inc.php')) {
+	$res = @include dirname(substr($tmp, 0, ($i + 1))).'/main.inc.php';
 }
-// Try main.inc.php using relative path
-if (!$res && file_exists("../../main.inc.php")) {
-	$res = @include "../../main.inc.php";
+if (!$res && file_exists('../../main.inc.php')) {
+	$res = @include '../../main.inc.php';
 }
-if (!$res && file_exists("../../../main.inc.php")) {
-	$res = @include "../../../main.inc.php";
+if (!$res && file_exists('../../../main.inc.php')) {
+	$res = @include '../../../main.inc.php';
 }
 if (!$res) {
-	die("Include of main fails");
+	die('Include of main fails');
 }
 
-// Libraries
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-require_once '../lib/usernavhistory.lib.php';
+require_once __DIR__.'/../lib/usernavhistory.lib.php';
+require_once __DIR__.'/../core/modules/modUserNavHistory.class.php';
 
-// Translations
-$langs->loadLangs(array("errors", "admin", "usernavhistory@usernavhistory"));
+$langs->loadLangs(array('admin', 'usernavhistory@usernavhistory'));
 
-// Access control
-if (!$user->admin) {
+if (empty($user->admin)) {
 	accessforbidden();
 }
 
-// Parameters
-$action = GETPOST('action', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
-
-
-/*
- * Actions
- */
-
-// None
-
-
-/*
- * View
- */
-
-$form = new Form($db);
-
-$help_url = '';
-$page_name = "UserNavHistoryAbout";
-
-llxHeader('', $langs->trans($page_name), $help_url);
-
-// Subheader
-$linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
-
-print load_fiche_titre($langs->trans($page_name), $linkback, 'title_setup');
-
-// Configuration header
-$head = usernavhistoryAdminPrepareHead();
-print dol_get_fiche_head($head, 'about', $langs->trans($page_name), 0, 'usernavhistory@usernavhistory');
-
-
-require_once __DIR__ . '/../class/techatm.class.php';
-$techATM = new \userNavHistory\TechATM($db);
-
-require_once __DIR__ . '/../core/modules/modUserNavHistory.class.php';
 $moduleDescriptor = new modUserNavHistory($db);
+$title = $langs->trans('UserNavHistoryAbout');
 
-print $techATM->getAboutPage($moduleDescriptor);
+llxHeader('', $title);
 
-// Page end
+$linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans('BackToModuleList').'</a>';
+print load_fiche_titre($title, $linkback, 'info');
+
+$head = usernavhistoryAdminPrepareHead();
+print dol_get_fiche_head($head, 'about', $title, -1, 'usernavhistory@usernavhistory');
+
+print '<div class="underbanner opacitymedium">'.$langs->trans('UserNavHistoryAboutPage').'</div><br>';
+print '<div class="fichecenter">';
+
+print '<div class="fichehalfleft"><div class="div-table-responsive-no-min">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre"><th colspan="2">'.$langs->trans('AboutGeneralInformation').'</th></tr>';
+print '<tr class="oddeven"><td class="titlefield">'.$langs->trans('ModuleName').'</td><td>'.$langs->trans('ModuleUserNavHistoryName').'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('Version').'</td><td>'.dol_escape_htmltag($moduleDescriptor->version).'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('Editor').'</td><td>'.dol_escape_htmltag($moduleDescriptor->editor_name).'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('Description').'</td><td>'.$langs->trans($moduleDescriptor->description).'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('Compatibility').'</td><td>'.$langs->trans('UserNavHistoryCompatibilityValue').'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('Dependencies').'</td><td>'.$langs->trans('NoRequiredDependency').'</td></tr>';
+print '<tr class="oddeven"><td>'.$langs->trans('License').'</td><td>GPLv3+</td></tr>';
+print '</table>';
+print '</div></div>';
+
+print '<div class="fichehalfright"><div class="div-table-responsive-no-min">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre"><th>'.$langs->trans('MainFeatures').'</th></tr>';
+print '<tr class="oddeven"><td><ul class="paddingleft">';
+print '<li>'.$langs->trans('AboutFeatureHistory').'</li>';
+print '<li>'.$langs->trans('AboutFeatureResponsive').'</li>';
+print '<li>'.$langs->trans('AboutFeatureMulticompany').'</li>';
+print '</ul></td></tr>';
+print '<tr class="liste_titre"><th>'.$langs->trans('UsefulLinks').'</th></tr>';
+print '<tr class="oddeven"><td><a href="https://github.com/mapiolca/usernavhistory" target="_blank" rel="noopener">'.$langs->trans('DocumentationAndSourceCode').'</a></td></tr>';
+print '<tr class="oddeven"><td><a href="'.dol_escape_htmltag($moduleDescriptor->editor_url).'" target="_blank" rel="noopener">'.dol_escape_htmltag($moduleDescriptor->editor_url).'</a></td></tr>';
+print '</table>';
+print '</div></div>';
+
+print '</div>';
 print dol_get_fiche_end();
-
 llxFooter();
 $db->close();

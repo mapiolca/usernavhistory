@@ -1,88 +1,36 @@
-# USERNAVHISTORY FOR [DOLIBARR ERP CRM](https://www.dolibarr.org)
+# UserNavHistory for Dolibarr ERP/CRM
+
+UserNavHistory displays the last business objects viewed by the current user in a compact navigation bar.
 
 ## Features
 
-Description of the module...
+- configurable number of retained and displayed objects;
+- native Dolibarr links, pictograms and tooltips;
+- responsive single-line layout that hides the oldest entries first;
+- labels limited to 15 characters followed by `...` when truncated;
+- separate history for each user and Dolibarr entity;
+- automatic restoration of hidden entries when the window becomes wider.
 
-<!--
-![Screenshot usernavhistory](img/screenshot_usernavhistory.png?raw=true "UserNavHistory"){imgmd}
--->
+## Compatibility
 
-Other external modules are available on [Dolistore.com](https://www.dolistore.com).
+- historical support: Dolibarr 16 or later and PHP 7.0 or later;
+- recommended environment: Dolibarr 20 or later and PHP 8.0 or later;
+- MySQL/MariaDB through the Dolibarr database abstraction.
 
-## Translations
-
-Translations can be completed manually by editing files into directories *langs*.
-
-<!--
-This module contains also a sample configuration for Transifex, under the hidden directory [.tx](.tx), so it is possible to manage translation using this service.
-
-For more informations, see the [translator's documentation](https://wiki.dolibarr.org/index.php/Translator_documentation).
-
-There is a [Transifex project](https://transifex.com/projects/p/dolibarr-module-template) for this module.
--->
-
-<!--
+Compatibility details for the current instance are available from **Module settings > Compatibility**.
 
 ## Installation
 
-### From the ZIP file and GUI interface
+Copy the `usernavhistory` directory directly into the Dolibarr custom modules directory, then enable **User browsing history** from the native module administration page.
 
-- If you get the module in a zip file (like when downloading it from the market place [Dolistore](https://www.dolistore.com)), go into
-menu ```Home - Setup - Modules - Deploy external module``` and upload the zip file.
+The maximum number of items is configured from the module settings. Disabling and re-enabling the module preserves this value.
 
-Note: If this screen tell you there is no custom directory, check your setup is correct:
+## Maintainers
 
-- In your Dolibarr installation directory, edit the ```htdocs/conf/conf.php``` file and check that following lines are not commented:
+ATM Consulting x Les Métiers du Bâtiment.
 
-    ```php
-    //$dolibarr_main_url_root_alt ...
-    //$dolibarr_main_document_root_alt ...
-    ```
+Technical ATM service names, URLs and module ID `104555` are intentionally retained for compatibility with existing installations.
 
-- Uncomment them if necessary (delete the leading ```//```) and assign a sensible value according to your Dolibarr installation
+## License
 
-    For example :
-
-    - UNIX:
-        ```php
-        $dolibarr_main_url_root_alt = '/custom';
-        $dolibarr_main_document_root_alt = '/var/www/Dolibarr/htdocs/custom';
-        ```
-
-    - Windows:
-        ```php
-        $dolibarr_main_url_root_alt = '/custom';
-        $dolibarr_main_document_root_alt = 'C:/My Web Sites/Dolibarr/htdocs/custom';
-        ```
-
-### From a GIT repository
-
-- Clone the repository in ```$dolibarr_main_document_root_alt/usernavhistory```
-
-```sh
-cd ....../custom
-git clone git@github.com:gitlogin/usernavhistory.git usernavhistory
-```
-
-### <a name="final_steps"></a>Final steps
-
-From your browser:
-
-  - Log into Dolibarr as a super-administrator
-  - Go to "Setup" -> "Modules"
-  - You should now be able to find and enable the module
-
--->
-
-## Licenses
-
-### Main code
-
-GPLv3 or (at your option) any later version. See file COPYING for more information.
-
-### Documentation
-
-All texts and readmes are licensed under GFDL.
-
- 
+GPLv3 or, at your option, any later version. See `COPYING`.

@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2025 ATM Consulting support@atm-consulting.fr
+/* Copyright (C) 2025-2026 ATM Consulting x Les Métiers du Bâtiment <support@atm-consulting.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

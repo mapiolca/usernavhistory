@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## 1.5.0 - 2026-07-15
+
+- NEW: responsive single-line navigation history that hides the oldest entries when space is limited.
+- NEW: truncate labels longer than 15 characters while preserving native links, pictograms and tooltips.
+- NEW: add native Compatibility and About administration tabs.
+- CHANGED: identify the module as ATM Consulting x Les Métiers du Bâtiment while retaining module ID 104555 and ATM technical services.
+- FIX: isolate history cleanup and display by entity in Multicompany environments.
+- FIX: escape navigation lookup criteria and preserve the configured history limit when the module is disabled.
+- COMPAT: retain Dolibarr 16+ and PHP 7.0+ support through the bundled compatibility layer; recommend Dolibarr 20+ and PHP 8.0+.
+
 ## 1.4
 - FIX : css margin-right in 20+ Dolibarr versions - 16/12/2025 - 1.4.1
 - FIX : css margin changes in 20+ Dolibarr versions + background color - 09/12/2025 - 1.4.0

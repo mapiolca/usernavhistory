@@ -1,40 +1,77 @@
+/* Copyright (C) 2026 ATM Consulting x Les Métiers du Bâtiment <developpeur@lesmetiersdubatiment.fr>
+ * License: GPLv3 or later.
+ */
+
 .usernavhistory {
-	margin-left: -40px;
-	margin-right: -36px;
 	margin-top: -14px;
+	box-sizing: border-box;
+	display: block;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
+	width: 100%;
+}
 
-	display: grid;
+.usernavhistory[hidden] {
+	display: none !important;
+}
+
+.usernavhistory .breadcrumb {
 	align-items: center;
-}
-
-.breadcrumb {
-	padding: 8px 15px;
-	margin-bottom: 0px;
-	margin-top: 0px;
+	background-color: var(--colorbackvmenu1, #f5f5f5);
+	box-sizing: border-box;
+	display: flex;
+	flex-wrap: nowrap;
 	list-style: none;
-	background-color: #f5f5f5;
+	margin-bottom: 0;
+	margin-top: 0;
+	max-width: 100%;
+	min-width: 0;
+	overflow: hidden;
+	padding: 8px 15px;
+	width: 100%;
 }
 
-.breadcrumb > li {
-	display: inline-block;
+.usernavhistory .breadcrumb > li {
+	flex: 0 0 auto;
 	opacity: 0.7;
+	white-space: nowrap;
 }
 
-.breadcrumb > li + li:hover {
+.usernavhistory .breadcrumb > li + li:hover {
 	opacity: 1;
 }
 
-.breadcrumb > li + li:before {
+.usernavhistory .breadcrumb > li + li:before {
 	content: "\00a0/\00a0";
 	padding: 0 5px;
 	color: #ccc;
 }
 
+.usernavhistory .usernavhistory-item[hidden] {
+	display: none !important;
+}
 
-.usernavhistory .breadcrumb img{
+.usernavhistory .usernavhistory-list--constrained .usernavhistory-item:not([hidden]) {
+	flex: 1 1 0;
+	max-width: calc(100% - 32px);
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.usernavhistory .usernavhistory-list--constrained .usernavhistory-item:not([hidden]) > a {
+	display: inline-block;
+	max-width: calc(100% - 30px);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+}
+
+.usernavhistory .breadcrumb img {
 	max-height: 16px;
 }
 
-.breadcrumb > li a img{
+.usernavhistory .breadcrumb > li a img {
 	vertical-align: middle;
 }
