@@ -157,6 +157,7 @@ echo '<span class="opacitymedium">'.$langs->trans("UserNavHistorySetupPage").'</
 
 
 if ($action == 'edit') {
+
 	print $formSetup->generateOutput(true);
 	print '<br>';
 } else {
@@ -166,7 +167,8 @@ if ($action == 'edit') {
 		print '<div class="tabsAction">';
 		print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=edit&token='.newToken().'">'.$langs->trans("Modify").'</a>';
 		print '</div>';
-	} else {
+	}
+	else {
 		print '<br>'.$langs->trans("NothingToSetup");
 	}
 }
