@@ -26,6 +26,8 @@ Copy the `usernavhistory` directory directly into the Dolibarr custom modules di
 
 The maximum number of items is configured from the module settings. Disabling and re-enabling the module preserves this value.
 
+This setting is an upper limit: if 10 items are configured but only 6 fit, the 6 most recent items are displayed. The visible count adjusts live to the available width, in portrait and landscape, without reloading the page. Hidden items return automatically when space becomes available.
+
 ## Maintainers
 
 ATM Consulting x Les Métiers du Bâtiment.

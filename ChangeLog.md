@@ -2,10 +2,11 @@
 
 ## [Unreleased]
 
+- NEW: recalculate the responsive history live after resizing and mobile portrait/landscape orientation changes; display only the most recent entries that fit, up to the configured limit.
+
 ## 1.5.0 - 2026-07-15
 
 - NEW: responsive single-line navigation history that hides the oldest entries when space is limited.
-- NEW: recalculate the responsive history after mobile portrait/landscape orientation changes.
 - NEW: truncate labels longer than 15 characters while preserving native links, pictograms and tooltips.
 - NEW: add native Compatibility and About administration tabs.
 - CHANGED: identify the module as ATM Consulting x Les Métiers du Bâtiment while retaining module ID 104555 and ATM technical services.
