@@ -10,6 +10,7 @@ UserNavHistory displays the last business objects viewed by the current user in 
 - labels limited to 15 characters followed by `...` when truncated;
 - separate history for each user and Dolibarr entity;
 - automatic restoration of hidden entries when the window becomes wider.
+- automatic recalculation when a mobile device switches between portrait and landscape orientations.
 
 ## Compatibility
 
@@ -24,6 +25,8 @@ Compatibility details for the current instance are available from **Module setti
 Copy the `usernavhistory` directory directly into the Dolibarr custom modules directory, then enable **User browsing history** from the native module administration page.
 
 The maximum number of items is configured from the module settings. Disabling and re-enabling the module preserves this value.
+
+This setting is an upper limit: if 10 items are configured but only 6 fit, the 6 most recent items are displayed. The visible count adjusts live to the available width, in portrait and landscape, without reloading the page. Hidden items return automatically when space becomes available.
 
 ## Maintainers
 
