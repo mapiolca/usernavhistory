@@ -2,7 +2,10 @@
 
 ## [Unreleased]
 
+## 1.5.1 - 2026-10-13
+
 - NEW: recalculate the responsive history live after resizing and mobile portrait/landscape orientation changes; display only the most recent entries that fit, up to the configured limit.
+- FIX: preserve the native window context for animation-frame callbacks to prevent initialization errors.
 
 ## 1.5.0 - 2026-07-15
 
