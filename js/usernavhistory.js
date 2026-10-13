@@ -126,10 +126,10 @@
 		Array.prototype.forEach.call(list.querySelectorAll('.usernavhistory-item'), truncateLabel);
 
 		var scheduledFrame = 0;
-		var requestFrame = window.requestAnimationFrame || function (callback) {
+		var requestFrame = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (callback) {
 			return window.setTimeout(callback, 16);
 		};
-		var cancelFrame = window.cancelAnimationFrame || window.clearTimeout;
+		var cancelFrame = window.cancelAnimationFrame ? window.cancelAnimationFrame.bind(window) : window.clearTimeout.bind(window);
 		var resizeList = function () {
 			if (scheduledFrame) {
 				cancelFrame(scheduledFrame);
