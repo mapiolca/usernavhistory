@@ -125,9 +125,20 @@
 
 		Array.prototype.forEach.call(list.querySelectorAll('.usernavhistory-item'), truncateLabel);
 
+		var scheduledFrame = 0;
+		var requestFrame = window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (callback) {
+			return window.setTimeout(callback, 16);
+		};
+		var cancelFrame = window.cancelAnimationFrame ? window.cancelAnimationFrame.bind(window) : window.clearTimeout.bind(window);
 		var resizeList = function () {
-			window.requestAnimationFrame(function () {
-				fitHistoryList(list);
+			if (scheduledFrame) {
+				cancelFrame(scheduledFrame);
+			}
+			scheduledFrame = requestFrame(function () {
+				scheduledFrame = requestFrame(function () {
+					scheduledFrame = 0;
+					fitHistoryList(list);
+				});
 			});
 		};
 
@@ -143,8 +154,11 @@
 		if (typeof ResizeObserver === 'function') {
 			var observer = new ResizeObserver(resizeList);
 			observer.observe(bar);
-		} else {
-			window.addEventListener('resize', resizeList);
+		}
+		window.addEventListener('resize', resizeList);
+		window.addEventListener('orientationchange', resizeList);
+		if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
+			window.visualViewport.addEventListener('resize', resizeList);
 		}
 	}
 
