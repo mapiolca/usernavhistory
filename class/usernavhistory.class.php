@@ -112,6 +112,10 @@ class UserNavHistory extends CommonObject
 	public $element_type;
 	public $date_last_view;
 	/**
+	 * @var CommonObject|null Resolved history object, or null when unavailable.
+	 */
+	public $object = null;
+	/**
 	 * @var string Main Dolibarr menu associated with the resolved history object.
 	 */
 	public $mainmodule = '';
