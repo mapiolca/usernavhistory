@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## 1.5.2 - 2026-10-28
+
+- FIX: declare the resolved navigation-history object to prevent PHP 8.2+ dynamic-property deprecations when displaying visited objects.
+
 ## 1.5.1 - 2026-10-13
 
 - NEW: recalculate the responsive history live after resizing and mobile portrait/landscape orientation changes; display only the most recent entries that fit, up to the configured limit.
